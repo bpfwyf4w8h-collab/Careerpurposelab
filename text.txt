@@ -1,0 +1,907 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career & Purpose Lab - Pilot Impact Report</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#dbeafe',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#0b0f19',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- html2pdf Library CDN for direct downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Base page sizes and clean screens layout */
+        .pdf-page {
+            margin-bottom: 3.5rem;
+            border-radius: 1rem;
+            min-height: 842px; /* Proportional on screen */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            page-break-inside: avoid !important;
+            page-break-after: auto;
+        }
+
+        /* Enforce absolute pixel alignment when processed by html2pdf */
+        .html2pdf__container .pdf-page {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            height: 1122px !important; /* Perfect height matching for standard A4 scale ratio */
+            max-height: 1122px !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            box-sizing: border-box !important;
+            padding: 60px 80px !important; /* Clean inner-page bounding margins */
+            overflow: hidden !important;
+        }
+
+        /* Prevent trailing empty pages */
+        .html2pdf__container .pdf-page:last-child {
+            page-break-after: avoid !important;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .pdf-page {
+                margin-bottom: 0 !important;
+                border-radius: 0 !important;
+                border: none !important;
+                height: 1122px !important;
+                page-break-after: always !important;
+            }
+            .pdf-page:last-child {
+                page-break-after: avoid !important;
+            }
+        }
+        .shadow-custom {
+            box-shadow: 0 10px 30px -10px rgba(2, 12, 27, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-navy-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header Navigation (Non-Printing) -->
+    <header class="no-print bg-navy-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded bg-amber-500 flex items-center justify-center font-bold text-navy-950 text-lg">L</div>
+                <span class="font-semibold text-lg tracking-wide text-white">The LuxBuzz Academy ASBL</span>
+            </div>
+            <nav class="hidden lg:flex space-x-1">
+                <button onclick="scrollToPage('page1')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Cover</button>
+                <button onclick="scrollToPage('page2')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 2</button>
+                <button onclick="scrollToPage('page3')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 3</button>
+                <button onclick="scrollToPage('page4')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 4</button>
+                <button onclick="scrollToPage('page5')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 5</button>
+                <button onclick="scrollToPage('page6')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 6</button>
+                <button onclick="scrollToPage('page7')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 7</button>
+                <button onclick="scrollToPage('page8')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 8</button>
+                <button onclick="scrollToPage('page9')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 9</button>
+                <button onclick="scrollToPage('page10')" class="px-2 py-2 text-xs font-medium text-slate-400 hover:text-white rounded transition">Page 10</button>
+            </nav>
+            <button id="downloadBtn" onclick="downloadPDF()" class="bg-amber-500 hover:bg-amber-600 text-navy-950 font-bold px-4 py-2 rounded text-sm flex items-center space-x-2 transition">
+                <i class="fa-solid fa-download"></i>
+                <span id="btnText">Download PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Content Target Container configured for html2pdf conversion (Zero margins & direct background injection) -->
+    <div id="pdf-container" class="bg-navy-950">
+        <!-- Main Multi-Page Wrapper -->
+        <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-8 lg:p-12 flex flex-col">
+
+            <!-- ========================================== -->
+            <!-- PAGE 1: COVER PAGE -->
+            <!-- ========================================== -->
+            <section id="page1" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom justify-center items-center text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div>
+                <div class="z-10 max-w-2xl px-4 flex flex-col items-center justify-between h-full py-12">
+                    <div class="flex items-center space-x-3 mb-8">
+                        <div class="w-12 h-12 rounded bg-amber-500 flex items-center justify-center font-bold text-navy-950 text-2xl">L</div>
+                        <span class="font-semibold text-xl tracking-wide text-white">The LuxBuzz Academy ASBL</span>
+                    </div>
+
+                    <div class="my-auto space-y-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500 bg-amber-500/10 px-4 py-1.5 rounded-full">Pilot Edition Evaluation</span>
+                        <h1 class="text-4xl sm:text-5xl font-extrabold font-serif text-white leading-tight">Career & Purpose Lab</h1>
+                        <p class="text-slate-400 text-base max-w-md mx-auto">
+                            A Comprehensive Program Impact Report Analyzing Career Pivot Mechanics, Confidence, and Self-Worth in Luxembourg's Professional Sector.
+                        </p>
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-8 w-full">
+                        <div class="flex justify-between items-center text-xs text-slate-500">
+                            <span>Published: June 2026</span>
+                            <span>Scale 1-10 Metrics Framework</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 2: EXECUTIVE SUMMARY -->
+            <!-- ========================================== -->
+            <section id="page2" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <!-- Top Brand Header -->
+                    <div class="flex justify-between items-start border-b border-slate-800 pb-8 mb-8">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 2 // Pilot Impact Report</span>
+                            <h1 class="text-3xl font-bold mt-2 font-serif text-white">Executive Summary</h1>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Date of Issue:</span>
+                            <span class="text-sm font-semibold text-white">June 2026</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- High-level Stats (Left Panel) -->
+                        <div class="md:col-span-1 space-y-6 border-r border-slate-800 pr-0 md:pr-8">
+                            <div>
+                                <span class="text-xs text-slate-400 block uppercase tracking-wider">Overall Success NPS</span>
+                                <div class="flex items-baseline space-x-1 mt-1">
+                                    <span class="text-5xl font-extrabold text-amber-500">9.8</span>
+                                    <span class="text-xl text-slate-400">/ 10</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Exceptional likelihood to recommend the program to peers.</p>
+                            </div>
+                            
+                            <div class="border-t border-slate-800 pt-6">
+                                <span class="text-xs text-slate-400 block uppercase tracking-wider">Pilot Cohort Completion</span>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <span class="text-3xl font-bold text-white">6</span>
+                                    <span class="text-slate-500">out of</span>
+                                    <span class="text-3xl font-bold text-slate-300">10</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Highly localized focus providing hyper-targeted cohort coaching.</p>
+                            </div>
+
+                            <div class="border-t border-slate-800 pt-6">
+                                <span class="text-xs text-slate-400 block uppercase tracking-wider">Top Expectations</span>
+                                <ul class="text-xs text-slate-300 mt-2 space-y-2">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-amber-500 mt-0.5">•</span>
+                                        <span>Career Transition Guidance</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-amber-500 mt-0.5">•</span>
+                                        <span>Practical Next-Step Strategies</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-amber-500 mt-0.5">•</span>
+                                        <span>Clarity of Purpose & Direction</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Executive Content (Right Panel) -->
+                        <div class="md:col-span-2 space-y-6">
+                            <h2 class="text-xl font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">Program Overview & Core Performance</h2>
+                            <p class="text-slate-300 text-sm leading-relaxed">
+                                The <strong>Career & Purpose Lab</strong>, conceptualized and hosted by <em>The LuxBuzz Academy ASBL</em>, represents a tactical 4-session accelerator led by 3 specialized executive coaches. The program was designed as a supportive environment to assist professional women who feel stuck, burnout, or in professional transition in Luxembourg.
+                            </p>
+
+                            <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                                <h3 class="text-xs font-semibold text-amber-500 uppercase tracking-widest">Key Performance Outcomes</h3>
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div class="bg-navy-900 p-3 rounded border border-slate-800">
+                                        <span class="text-slate-400 text-xs block">Presenting Value</span>
+                                        <span class="text-xl font-bold text-white">+92% Growth</span>
+                                        <span class="text-[10px] text-slate-500 block">Avg. 4.33 to 8.33</span>
+                                    </div>
+                                    <div class="bg-navy-900 p-3 rounded border border-slate-800">
+                                        <span class="text-slate-400 text-xs block">Network & Connection</span>
+                                        <span class="text-xl font-bold text-white">+80% Growth</span>
+                                        <span class="text-[10px] text-slate-500 block">Avg. 4.17 to 7.50</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-slate-300 text-sm leading-relaxed">
+                                The pilot demonstrated that despite high entry-level motivation, candidates lacked networking confidence and value-articulation tools. The Lab closed this delta, boosting average clarity scores by <strong>53%</strong> and career presentation metrics by <strong>92%</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Standout Testimonial Footer -->
+                <div class="mt-8 pt-6 border-t border-slate-800">
+                    <p class="text-sm italic font-serif text-slate-300 text-center relative px-6">
+                        "I gained clarity on my career path and got answers on questions I had such as how do I start my company, is fractional CMO a real thing, can I be happy as a self-employed... The methods and tips used were very helpful throughout the whole course."
+                    </p>
+                    <span class="text-xs font-bold text-amber-500 block text-center mt-2 uppercase">— Denitsa Mihova, Senior Marketing Specialist</span>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 3: WHO JOINED & WHY -->
+            <!-- ========================================== -->
+            <section id="page3" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-8">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 3</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Who Joined & Why</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Participant Demographics -->
+                        <div class="space-y-6">
+                            <h3 class="text-md font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">The Cohort Profile</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <span class="text-xs text-slate-400 uppercase tracking-wider">Age Distribution</span>
+                                    <div class="flex space-x-3 mt-1">
+                                        <span class="bg-navy-950 px-3 py-1.5 rounded text-xs text-slate-300 border border-slate-800">25–35 Years (33%)</span>
+                                        <span class="bg-navy-950 px-3 py-1.5 rounded text-xs text-slate-300 border border-slate-800">36–45 Years (50%)</span>
+                                        <span class="bg-navy-950 px-3 py-1.5 rounded text-xs text-slate-300 border border-slate-800">55+ Years (17%)</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span class="text-xs text-slate-400 uppercase tracking-wider">Target Employment Segments</span>
+                                    <div class="grid grid-cols-2 gap-2 mt-2">
+                                        <div class="bg-navy-950 p-3 rounded border border-slate-800 text-center">
+                                            <span class="text-xs text-slate-400 block">Job Seekers</span>
+                                            <span class="text-lg font-bold text-white">33%</span>
+                                        </div>
+                                        <div class="bg-navy-950 p-3 rounded border border-slate-800 text-center">
+                                            <span class="text-xs text-slate-400 block">Career Transitioners</span>
+                                            <span class="text-lg font-bold text-white">33%</span>
+                                        </div>
+                                        <div class="bg-navy-950 p-3 rounded border border-slate-800 text-center">
+                                            <span class="text-xs text-slate-400 block">Active Employees</span>
+                                            <span class="text-lg font-bold text-white">17%</span>
+                                        </div>
+                                        <div class="bg-navy-950 p-3 rounded border border-slate-800 text-center">
+                                            <span class="text-xs text-slate-400 block">Entrepreneurs</span>
+                                            <span class="text-lg font-bold text-white">17%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivations Table -->
+                        <div class="space-y-6">
+                            <h3 class="text-md font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">Entry Objectives</h3>
+                            
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase">
+                                        <th class="pb-2 text-left bg-transparent p-0 text-slate-400">Motivation</th>
+                                        <th class="pb-2 text-center bg-transparent p-0 w-24 text-slate-400">Cohort Mentions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800">
+                                    <tr>
+                                        <td class="py-3 text-slate-300">Career transition guidance</td>
+                                        <td class="py-3 text-center font-bold text-amber-500">6 / 6</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 text-slate-300">Practical next step strategies</td>
+                                        <td class="py-3 text-center font-bold text-amber-500">6 / 6</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 text-slate-300">Career vision/clarity</td>
+                                        <td class="py-3 text-center font-bold text-amber-500">5 / 6</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 text-slate-300">Understanding purpose & direction</td>
+                                        <td class="py-3 text-center font-bold text-slate-400">5 / 6</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Representative Entry Quotes -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 pt-6 border-t border-slate-800">
+                    <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 relative">
+                        <p class="text-xs italic text-slate-300">"After 4 yrs in a fast paced big4 I am now longing for a sustainable and purposeful environment... Right now I feel burnout and lost."</p>
+                        <span class="text-[10px] text-amber-500 font-bold block mt-2 uppercase">— Lily, Active Corporate Employee</span>
+                    </div>
+                    <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 relative">
+                        <p class="text-xs italic text-slate-300">"I moved to Luxembourg and struggled to get start my career because of language barrier and less opportunities... I feel i need more guidance."</p>
+                        <span class="text-[10px] text-amber-500 font-bold block mt-2 uppercase">— Nikita, Marketing Specialist (Relocated)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 4: IMPACT & OUTCOMES -->
+            <!-- ========================================== -->
+            <section id="page4" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 4</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Impact & Outcomes</h2>
+                    </div>
+
+                    <!-- Custom Grid with Ratings comparison and chart -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        <!-- Pre vs Post Chart (CSS-based Bars) -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Transformation Benchmarks (Scale 1-10)</h3>
+                            
+                            <div class="space-y-3 pt-2">
+                                <!-- Clarity -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-semibold">
+                                        <span class="text-slate-300">Career Clarity</span>
+                                        <span class="text-amber-500">5.33 <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i> 8.17</span>
+                                    </div>
+                                    <div class="h-3 bg-navy-950 rounded-full overflow-hidden relative">
+                                        <div class="absolute top-0 left-0 h-full bg-slate-700 rounded-full" style="width: 53%"></div>
+                                        <div class="absolute top-0 left-0 h-full bg-amber-500 rounded-full opacity-70" style="width: 81.7%"></div>
+                                    </div>
+                                </div>
+                                <!-- Confidence -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-semibold">
+                                        <span class="text-slate-300">Professional Confidence</span>
+                                        <span class="text-amber-500">5.50 <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i> 8.00</span>
+                                    </div>
+                                    <div class="h-3 bg-navy-950 rounded-full overflow-hidden relative">
+                                        <div class="absolute top-0 left-0 h-full bg-slate-700 rounded-full" style="width: 55%"></div>
+                                        <div class="absolute top-0 left-0 h-full bg-amber-500 rounded-full opacity-70" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <!-- Strengths -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-semibold">
+                                        <span class="text-slate-300">Understanding Strengths</span>
+                                        <span class="text-amber-500">6.50 <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i> 8.50</span>
+                                    </div>
+                                    <div class="h-3 bg-navy-950 rounded-full overflow-hidden relative">
+                                        <div class="absolute top-0 left-0 h-full bg-slate-700 rounded-full" style="width: 65%"></div>
+                                        <div class="absolute top-0 left-0 h-full bg-amber-500 rounded-full opacity-70" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <!-- Present Value -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-semibold">
+                                        <span class="text-slate-300">Presenting Value to Employers</span>
+                                        <span class="text-amber-500">4.33 <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i> 8.33</span>
+                                    </div>
+                                    <div class="h-3 bg-navy-950 rounded-full overflow-hidden relative">
+                                        <div class="absolute top-0 left-0 h-full bg-slate-700 rounded-full" style="width: 43.3%"></div>
+                                        <div class="absolute top-0 left-0 h-full bg-amber-500 rounded-full opacity-70" style="width: 83.3%"></div>
+                                    </div>
+                                </div>
+                                <!-- Optimism -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-semibold">
+                                        <span class="text-slate-300">Optimism about Future</span>
+                                        <span class="text-amber-500">6.67 <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i> 8.17</span>
+                                    </div>
+                                    <div class="h-3 bg-navy-950 rounded-full overflow-hidden relative">
+                                        <div class="absolute top-0 left-0 h-full bg-slate-700 rounded-full" style="width: 66.7%"></div>
+                                        <div class="absolute top-0 left-0 h-full bg-amber-500 rounded-full opacity-70" style="width: 81.7%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Improvement Table -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cohort Improvement Rates</h3>
+                            
+                            <div class="bg-navy-950 rounded-xl p-4 border border-slate-800 space-y-4">
+                                <div class="flex justify-between items-center border-b border-slate-900 pb-3">
+                                    <div>
+                                        <span class="text-sm font-semibold text-white block">Value Presentation</span>
+                                        <span class="text-[10px] text-slate-400">Avg. growth: +4.00 pts</span>
+                                    </div>
+                                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">100% Improved</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-900 pb-3">
+                                    <div>
+                                        <span class="text-sm font-semibold text-white block">Career Clarity</span>
+                                        <span class="text-[10px] text-slate-400">Avg. growth: +2.83 pts</span>
+                                    </div>
+                                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">100% Improved</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-900 pb-3">
+                                    <div>
+                                        <span class="text-sm font-semibold text-white block">Strengths Identification</span>
+                                        <span class="text-[10px] text-slate-400">Avg. growth: +2.00 pts</span>
+                                    </div>
+                                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">100% Improved</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="text-sm font-semibold text-white block">Professional Confidence</span>
+                                        <span class="text-[10px] text-slate-400">Avg. growth: +2.50 pts</span>
+                                    </div>
+                                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">83.3% Improved</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Explanatory note -->
+                <div class="mt-8 p-4 bg-navy-950 border border-slate-800 rounded-xl">
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        <strong>Analytical Insight:</strong> The data confirms a systematic, cohort-wide upward pivot. Value representation saw the most dramatic progress (+4.00 absolute delta), revealing that while candidates possessed baseline competencies, their ability to pitch their strengths was severely under-developed prior to the 4 modules.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 5: PARTICIPANT JOURNEYS -->
+            <!-- ========================================== -->
+            <section id="page5" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 5</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Participant Journeys & Transformations</h2>
+                    </div>
+
+                    <!-- The Common Arc description -->
+                    <div class="mb-8">
+                        <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-2">The Collective Cohort Arc</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Participants generally entered the programme seeking greater clarity and confidence, feeling stagnated or "stuck" in transitional career limbo. Through structured reflection and external market positioning, the group experienced a unified shift: moving from internal self-doubt and isolation towards a solid understanding of their professional superpowers, with actionable job-hunting plans in hand.
+                        </p>
+                    </div>
+
+                    <!-- 3 Representative Spotlights -->
+                    <div class="space-y-4">
+                        <!-- Story 1 -->
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold text-white uppercase tracking-wider">Spotlight 1: The Corporate Pivot (Active Burnout)</span>
+                                <span class="text-[10px] text-amber-500 font-bold">Lily Nguyen</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Lily entered feeling "burnout and lost" after 4 years of consulting. The program helped her step back and map her career milestones. Her ability to present her value to recruiters jumped from <strong>3 to 8</strong>. She completed the course with a positive plan to find a sustainable, purposeful environment.
+                            </p>
+                        </div>
+
+                        <!-- Story 2 -->
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold text-white uppercase tracking-wider">Spotlight 2: Overcoming the Long-Term Gap</span>
+                                <span class="text-[10px] text-amber-500 font-bold">Agnese Variakoje</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Agnese was experiencing a 3+ year career gap and felt completely "stuck". The mindset reframing exercises in Session 3 helped her challenge her negative beliefs. Her career clarity score jumped by **+5 points** (from 2 to 7). She left with a clear plan on where to start and how to target local opportunities.
+                            </p>
+                        </div>
+
+                        <!-- Story 3 -->
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold text-white uppercase tracking-wider">Spotlight 3: Transcending the Relocation Barrier</span>
+                                <span class="text-[10px] text-amber-500 font-bold">Nikita Burman</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Nikita had been looking for work for over 3 years due to local language barriers. She lacked networking connections and confidence. Through the cohort model, her network score grew by **+8 points** (from 1 to 9), and she built the confidence to actively ask questions and connect with peers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 6: SESSION IMPACT BREAKDOWN -->
+            <!-- ========================================== -->
+            <section id="page6" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 6</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Session Impact Breakdown</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Session Table -->
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400 text-left uppercase">
+                                    <th class="pb-2 bg-transparent p-0 text-slate-400">Session Title</th>
+                                    <th class="pb-2 text-center bg-transparent p-0 w-24 text-slate-400">Avg. Rating</th>
+                                    <th class="pb-2 bg-transparent p-0 pl-4 text-slate-400">Key Cohort Takeaway</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="py-4 font-semibold text-white">S1: Career, Direction, Purpose <br><span class="text-[10px] text-slate-400">Steve Muscat Azzopardi</span></td>
+                                    <td class="py-4 text-center text-amber-500 font-bold">9.83 / 10</td>
+                                    <td class="py-4 text-slate-300 pl-4">Re-mapping past achievements and defining clear professional boundaries.</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-semibold text-white">S2: Career Strategy & Positioning <br><span class="text-[10px] text-slate-400">Marina Krasochka</span></td>
+                                    <td class="py-4 text-center text-amber-500 font-bold">9.83 / 10</td>
+                                    <td class="py-4 text-slate-300 pl-4">Structuring a cohesive elevator pitch and target company list.</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-semibold text-white">S3: Professional Presence & Confidence <br><span class="text-[10px] text-slate-400">Miriam Vetrano</span></td>
+                                    <td class="py-4 text-center text-amber-500 font-bold">9.33 / 10</td>
+                                    <td class="py-4 text-slate-300 pl-4">Identifying and reframing negative internal career beliefs.</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-semibold text-white">S4: Career Tools & Next Step Plan <br><span class="text-[10px] text-slate-400">Marina Krasochka</span></td>
+                                    <td class="py-4 text-center text-amber-500 font-bold">9.83 / 10</td>
+                                    <td class="py-4 text-slate-300 pl-4">Practical, recruiter-focused strategies for LinkedIn and CVs.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Narrative analysis -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+                            <div>
+                                <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-2">Most Impactful Elements</h3>
+                                <p class="text-xs text-slate-300 leading-relaxed">
+                                    Marina Krasochka's practical recruiter insights (Sessions 2 & 4) resonated deeply with participants. This success was driven by her sharp, pragmatic approach, which directly addressed their anxiety around marketing themselves.
+                                </p>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-2">Recurring Themes</h3>
+                                <p class="text-xs text-slate-300 leading-relaxed">
+                                    The most prominent theme across all feedback was an urgent demand for <strong>more time</strong>. Participants also requested more direct, individual feedback to audit their elevator pitches and LinkedIn profiles.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 7: PROGRAM EVALUATION METRICS & NPS -->
+            <!-- ========================================== -->
+            <section id="page7" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 7</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Program Evaluation Metrics</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <!-- Metric 1: NPS -->
+                        <div class="md:col-span-1 bg-navy-950 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-amber-500 uppercase tracking-widest block mb-1">Recommendation (NPS)</span>
+                                <h3 class="text-slate-400 text-xs leading-relaxed">Likelihood to recommend to peers</h3>
+                            </div>
+                            <div class="mt-4">
+                                <span class="text-5xl font-extrabold text-white">9.83</span>
+                                <span class="text-lg text-slate-400">/ 10</span>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 98.3%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 2: Content Relevance -->
+                        <div class="md:col-span-1 bg-navy-950 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-amber-500 uppercase tracking-widest block mb-1">Content Relevance</span>
+                                <h3 class="text-slate-400 text-xs leading-relaxed">Alignment with professional goals</h3>
+                            </div>
+                            <div class="mt-4">
+                                <span class="text-5xl font-extrabold text-white">10.0</span>
+                                <span class="text-lg text-slate-400">/ 10</span>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 3: Group Environment -->
+                        <div class="md:col-span-1 bg-navy-950 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-amber-500 uppercase tracking-widest block mb-1">Group Environment</span>
+                                <h3 class="text-slate-400 text-xs leading-relaxed">Peer support and interactions</h3>
+                            </div>
+                            <div class="mt-4">
+                                <span class="text-5xl font-extrabold text-white">9.83</span>
+                                <span class="text-lg text-slate-400">/ 10</span>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 98.3%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Additional Program KPIs -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider block">Coaching & Facilitation</span>
+                                <span class="text-sm font-semibold text-white">Instructors expertise and delivery</span>
+                            </div>
+                            <span class="text-xl font-bold text-amber-500">9.50 / 10</span>
+                        </div>
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider block">Reflection vs Application</span>
+                                <span class="text-sm font-semibold text-white">Balance of theory and concrete tactics</span>
+                            </div>
+                            <span class="text-xl font-bold text-amber-500">9.67 / 10</span>
+                        </div>
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider block">Value for Career</span>
+                                <span class="text-sm font-semibold text-white">Impact on long term career development</span>
+                            </div>
+                            <span class="text-xl font-bold text-amber-500">9.67 / 10</span>
+                        </div>
+                        <div class="bg-navy-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider block">Organization & Communication</span>
+                                <span class="text-sm font-semibold text-white">Administrative execution & venue</span>
+                            </div>
+                            <span class="text-xl font-bold text-amber-500">9.17 / 10</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-slate-800 pt-4 font-sans">
+                    <p class="text-[10px] text-slate-500 leading-relaxed text-center">
+                        Evaluation parameters measured quantifiably across all 6 program completers using unweighted Likert-scale translations.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 8: THE COACHING EXPERIENCE - DIRECT QUOTES -->
+            <!-- ========================================== -->
+            <section id="page8" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 8</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">The Coaching Experience</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Quote 1 -->
+                        <div class="bg-navy-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <p class="text-xs italic text-slate-300 leading-relaxed">
+                                "From day one I felt very welcomed, respected and valued here by all presenters and especially by Angelica who is super sweet and very attentive that everyone gets the most value out of this and is comfortable... You can see Angelica selects high quality people."
+                            </p>
+                            <span class="text-[10px] text-amber-500 font-bold block mt-3 uppercase text-right">— Lily Nguyen</span>
+                        </div>
+                        
+                        <!-- Quote 2 -->
+                        <div class="bg-navy-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <p class="text-xs italic text-slate-300 leading-relaxed">
+                                "I am happy I had the time to pause, reflect and speak with specialists in the area of recruitment, consultancy, psychology. I value the connections I made and the exchanges with them... Angelica's warmth made it worth coming back again and again."
+                            </p>
+                            <span class="text-[10px] text-amber-500 font-bold block mt-3 uppercase text-right">— Denitsa Mihova</span>
+                        </div>
+
+                        <!-- Quote 3 -->
+                        <div class="bg-navy-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <p class="text-xs italic text-slate-300 leading-relaxed">
+                                "I love Marina as she is very practical and clear in facilitating. The structure of her workshops make sense and are easy to understand. I wish to have more time with her... Like her positivity and knowledge of job search."
+                            </p>
+                            <span class="text-[10px] text-amber-500 font-bold block mt-3 uppercase text-right">— Agnese Variakoje</span>
+                        </div>
+
+                        <!-- Quote 4 -->
+                        <div class="bg-navy-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <p class="text-xs italic text-slate-300 leading-relaxed">
+                                "My biggest takeaway is Marina's practical recruiter eyes view... This session helped me to strengthen my confidence based on analysis of what I am good at, unique at. I was able to prepare professional, short communication with which I feel good."
+                            </p>
+                            <span class="text-[10px] text-amber-500 font-bold block mt-3 uppercase text-right">— Dorota Steciuk-Godzieba</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-slate-800 pt-4 text-center">
+                    <p class="text-[11px] text-slate-400">
+                        "I did need this encouragement and tools. Thank you for this program."
+                    </p>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 9: PARTICIPANT VOICES -->
+            <!-- ========================================== -->
+            <section id="page9" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 9</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Participant Voices</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Clarity -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Career Clarity</span>
+                            <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                                <p class="text-xs italic text-slate-300">"I gained clarity on my career path... is fractional CMO a real thing, can I be happy as a self-employed. The methods used were very helpful."</p>
+                                <span class="text-[9px] text-slate-500 block text-right mt-1">— Denitsa Mihova</span>
+                            </div>
+                        </div>
+
+                        <!-- Confidence -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Confidence & Identity</span>
+                            <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                                <p class="text-xs italic text-slate-300">"This session deep dived into my own identity, reprogramming, and reframing... it’s a confidence boost that I can do what I set my mind into."</p>
+                                <span class="text-[9px] text-slate-500 block text-right mt-1">— Claribelle Rohde</span>
+                            </div>
+                        </div>
+
+                        <!-- Purpose -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Purpose Alignment</span>
+                            <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                                <p class="text-xs italic text-slate-300">"To introspect and reflect on my current career and find the confidence to make a change to a sustainable and purposeful environment."</p>
+                                <span class="text-[9px] text-slate-500 block text-right mt-1">— Lily Nguyen</span>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Action & Tools</span>
+                            <div class="bg-navy-950 p-4 rounded-xl border border-slate-800">
+                                <p class="text-xs italic text-slate-300">"Practical session on CV, LinkedIn and networking. I know exactly what I need to change on my LinkedIn profile now."</p>
+                                <span class="text-[9px] text-slate-500 block text-right mt-1">— Dorota Steciuk-Godzieba</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PAGE 10: LESSONS LEARNED & NEXT STEPS -->
+            <!-- ========================================== -->
+            <section id="page10" class="pdf-page bg-navy-900 border border-slate-800 p-8 sm:p-12 shadow-custom">
+                <div>
+                    <div class="border-b border-slate-800 pb-4 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-500">Page 10</span>
+                        <h2 class="text-2xl font-bold text-white font-serif mt-1">Lessons Learned & Next Steps</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Retrospective Analysis -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider">What Worked Well</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                The structured, chronological flow of the curriculum succeeded because it balanced internal self-discovery with external positioning. The cozy atmosphere, premium venue, and small cohort size established a safe space for open discussion.
+                            </p>
+
+                            <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider pt-2">Retention Observations</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Out of **10 enrolled candidates, 6 completed** the full pilot program. This retention rate highlights the balancing act professional women face—navigating active careers, job searches, or family responsibilities while trying to prioritize personal growth.
+                            </p>
+                        </div>
+
+                        <!-- Areas of Improvement & Recommendations -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Recommendations for Future Cohorts</h3>
+                            <ul class="text-xs text-slate-300 space-y-3">
+                                <li class="flex items-start space-x-2">
+                                    <span class="text-amber-500 mt-0.5">•</span>
+                                    <span><strong>Extend Session Lengths:</strong> Increase session runtimes by 30–45 minutes to give participants more time to reflect.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <span class="text-amber-500 mt-0.5">•</span>
+                                    <span><strong>Embed Practical Audit Labs:</strong> Add dedicated workshops for live, personal LinkedIn and resume audits.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <span class="text-amber-500 mt-0.5">•</span>
+                                    <span><strong>Scenario-Based Mindset Modules:</strong> Connect abstract self-confidence concepts with real-world scenarios, such as handling high-pressure networking.</span>
+                                </li>
+                                <li class="flex items-start space-x-2">
+                                    <span class="text-amber-500 mt-0.5">•</span>
+                                    <span><strong>Post-Program Check-ins:</strong> Introduce monthly peer accountability circles to maintain momentum in the job market.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program Footer Info -->
+                <div class="mt-8 pt-6 border-t border-slate-800 text-center">
+                    <span class="text-xs font-semibold text-slate-400 block">The LuxBuzz Academy ASBL</span>
+                    <span class="text-[10px] text-slate-500 block mt-1">All material processed confidentially and anonymized under General Data Protection Regulations (GDPR) frameworks.</span>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="no-print bg-navy-900 border-t border-slate-800 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-slate-400">&copy; 2026 The LuxBuzz Academy ASBL. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Print Navigation Helpers -->
+    <script>
+        function scrollToPage(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Direct PDF Download Logic using html2pdf
+        function downloadPDF() {
+            const btn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            
+            // Temporary loading state
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.innerText = "Generating PDF...";
+
+            // Configure rendering element and export parameters
+            const element = document.getElementById('pdf-container');
+            const opt = {
+                margin:       0, // Zero margin to prevent layout page break offsets
+                filename:     'Career_and_Purpose_Lab_Pilot_Impact_Report.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#0b0f19' // Force exact dark background matching
+                },
+                jsPDF:        { unit: 'px', format: [794, 1122], hotfixes: ['px_scaling'] }, // Pixel-perfect A4 proportional sizing
+                pagebreak:    { mode: ['css', 'legacy'], before: '.pdf-page', avoid: 'tr, p, div, blockquote' }
+            };
+
+            // Run generation promise chain
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore button state
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnText.innerText = "Download PDF";
+            }).catch(err => {
+                console.error("PDF generation failed:", err);
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnText.innerText = "Download PDF";
+            });
+        }
+    </script>
+</body>
+</html>
+
+```
